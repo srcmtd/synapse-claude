@@ -1,0 +1,21 @@
+$api = $lib.import(srcmtd.claude.api)
+
+// Get the prompt from command arguments
+$prompt = $cmdopts.prompt
+if ($prompt = $lib.null) {
+    $lib.print("Usage: claude.ask \"Your prompt here\"")
+    return()
+}
+
+$lib.print("Sending prompt to Claude...")
+
+$response = $api.callClaude($prompt)
+
+if ($response != $lib.null) {
+    $lib.print("Claude Response:")
+    $lib.print("==================================================")
+    $lib.print($response)
+    $lib.print("==================================================")
+} else {
+    $lib.print("Failed to get response from Claude API")
+}

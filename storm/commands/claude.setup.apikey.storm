@@ -1,0 +1,9 @@
+$privsep = $lib.import(srcmtd.claude.privsep)
+
+if ($cmdopts.self) {
+    $lib.print("Setting Anthropic API key for the current user.")
+} else {
+    $lib.print("Setting Anthropic API key for all users.")
+}
+
+$privsep.setApiKey($cmdopts.apikey, $cmdopts.self)

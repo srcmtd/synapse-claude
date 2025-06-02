@@ -1,0 +1,60 @@
+$privsep = $lib.import(srcmtd.claude.privsep)
+
+// Send prompt and  to Claude AI for analysis
+// Args:
+//  - prompt (str): The analysis prompt to send to Claude
+//  - model (str): Claude model to use (optional)
+// Returns: str
+//  - Claude's response text, or null if error
+function callClaude(prompt, model="claude-sonnet-4-20250514") {
+    
+    // Get API key using privsep module
+    $apikey = $privsep.getApiKey()
+    
+    // Prepare messages array
+    $messages = $lib.list()
+    
+    $message = ({"role": "user", "content": $prompt})
+    $messages.append($message)
+    
+    // Prepare API request payload
+    $payload = ({
+        "model": $model,
+        "max_tokens": 4096,
+        "messages": $messages
+    })
+    
+    // Prepare headers
+    $headers = ({
+        "Content-Type": "application/json",
+        "x-api-key": $apikey,
+        "anthropic-version": "2023-06-01"
+    })
+    
+    try {
+        // Make API call
+        $resp = $lib.inet.http.post("https://api.anthropic.com/v1/messages", 
+            headers=$headers, 
+            json=$payload,
+            timeout=30
+        )
+        
+        if ($resp.code != 200) {
+            $lib.warn("Claude API request failed with status {code}: {reason}", code=$resp.code, reason=$resp.reason)
+            return($lib.null)
+        }
+        
+        $respjson = $resp.json()
+        
+        if ($respjson.content and $respjson.content.0.text) {
+            return($respjson.content.0.text)
+        } else {
+            $lib.warn("Unexpected response format from Claude API")
+            return($lib.null)
+        }
+        
+    } catch StormRuntimeError as err {
+        $lib.warn("Error calling Claude API: {err}", err=$err.mesg)
+        return($lib.null)
+    }
+}

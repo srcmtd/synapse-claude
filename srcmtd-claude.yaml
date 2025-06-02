@@ -1,0 +1,45 @@
+name: srcmtd-claude
+version: 0.0.1
+
+synapse_version: '>=2.145.0,<3.0.0'
+genopts:
+    dotstorm: true
+
+author:
+  url: https://github.com/mattreduce
+  name: Matthew Conway
+
+desc: A Rapid Power-Up that allows analysts to send nodes and a prompt to Anthropic's Claude AI
+
+perms:
+  - perm: [ srcmtd, claude, user ]
+    gate: cortex
+    desc: Allows a user to call privileged APIs from srcmtd-claude.
+
+modules:
+  - name: srcmtd.claude.api
+  - name: srcmtd.claude.privsep
+    asroot:perms:
+      - [ srcmtd, claude, user ]
+
+commands:
+
+  - name: claude.ask
+    descr: Send any nodes passed in along with a prompt to Claude
+    perms:
+      - [ srcmtd, claude, user ]
+
+  - name: claude.setup.apikey
+    descr: Configure Anthropic API key
+    perms:
+      - [ srcmtd, claude, user ]
+    cmdargs:
+      - - apikey
+        - type: str
+          help: The Anthropic API key
+      - - --self
+        - type: bool
+          default: false
+          action: store_true
+          help: Set the key as a user variable. If not used, the key is set globally.
+
